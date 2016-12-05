@@ -969,7 +969,7 @@ function getChecksum(name) {
 }
 
 function testRoom(name, checksum) {
-    console.log(`${getChecksum(name)} === ${checksum})`);
+    // console.log(`${getChecksum(name)} === ${checksum}`);
     return getChecksum(name) === checksum;
 }
 
