@@ -1838,9 +1838,15 @@ function ipSupportsSsl(ip) {
             .map((aba) => `${aba[1]}${aba[0]}${aba[1]}`)));
     });
 
-    return bracketed.reduce((a, str) =>
-        Math.max(a, babs.reduce((i, bab) => Math.max(i, str.indexOf(bab)), -1))
-    , -1) > -1;
+    for (var i = 0; i < bracketed.length; i++) {
+        for (var j = 0; j < babs.length; j++) {
+            if (bracketed[i].indexOf(babs[j]) >= 0) {
+                return true;
+            }
+        }
+    }
+
+    return false;
 }
 
 console.log(ipSupportsSsl('aba[bab]xyz'));
