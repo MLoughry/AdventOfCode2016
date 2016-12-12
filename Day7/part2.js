@@ -1822,7 +1822,16 @@ function ipSupportsSsl(ip) {
 
     var babs = [];
     unbracketed.forEach((str) => {
-        var abas = str.match(/(\w)\w\1/g);
+        var abas = [];
+        var abaMatch;
+        var abaRegex = /(?=((\w)\w\2))/g;
+
+        while ((abaMatch = abaRegex.exec(str)) != null) {
+            if (abaMatch.index === abaRegex.lastIndex) {
+                abaRegex.lastIndex++;
+            }
+            abas.push(abaMatch[1]);
+        }
 
         abas && (babs = babs.concat(abas
             .filter((aba) => aba[0] !== aba[1])
@@ -1834,4 +1843,8 @@ function ipSupportsSsl(ip) {
     , -1) > -1;
 }
 
+console.log(ipSupportsSsl('aba[bab]xyz'));
+console.log(!ipSupportsSsl('xyx[xyx]xyx'));
+console.log(ipSupportsSsl('aaa[kek]eke'));
+console.log(ipSupportsSsl('zazbz[bzb]cdb'));
 console.log(input.split('\n').filter(ipSupportsSsl).length);
