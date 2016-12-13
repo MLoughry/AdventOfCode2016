@@ -144,28 +144,69 @@ rotate column x=3 by 5
 rotate column x=2 by 5
 rotate column x=1 by 5`;
 
+class Display {
+    constructor(rows, cols) {
+        this.grid = new Array(cols)
+                        .fill(0)
+                        .map(row => new Array(rows).fill(0));
+    }
 
-var rectRegEx = /rect (\d+)x(\d+)/;
-var rotateRegEx = /rotate (column x|row y)=(\d+) by (\d+)/;
+    rect(cols, rows) {
+        for (var x= 0; x < cols; x++) {
+            for (var y = 0; y < rows; y++) {
+                this.grid[x][y] = 1;
+            }
+        }
+    }
 
-function rect(screen, x, y) {
-    screen.map((column, colIndex) =>
-        column.map((point, rowIndex) =>
-            (colIndex < x && rowIndex < y) ? true : point));
+    rotateColumn(col, distance) {
+        for (var i = 0; i < this.grid[col].length - distance; i++) {
+            this.grid[col].push(this.grid[col].shift());
+        }
+    }
+
+    rotateRow(row, distance) {
+        var shiftedRow = new Array(this.grid.length);
+        for (var i = 0; i < shiftedRow.length; i++) {
+            shiftedRow[(i + distance) % shiftedRow.length] = this.grid[i][row];
+        }
+        for (var i = 0; i < shiftedRow.length; i++) {
+            this.grid[i][row] = shiftedRow[i];
+        }
+    }
+
+    getNumberLit() {
+        return this.grid
+            .reduce((total, row) =>
+                total + row.reduce((a, light) => a + light,
+                        0),
+            0);
+    }
 }
 
-function createScreen(text, colums, rows) {
-    var screen = new Array(colums).fill(true).map(a => new Array(rows).fill(false));
+var rectRegex = /rect (\d+)x(\d+)/;
+var rotateRegex = /rotate (row y|column x)=(\d+) by (\d+)/;
 
-    text.split('\n')
-        .forEach(line => {
+function programDisplay(instructions, rows, cols) {
+    var display = new Display(rows, cols);
+
+    instructions
+        .split('\n')
+        .forEach((line) => {
             var match;
-            if (match = rectRegEx.exec(line)) {
-                var x = +match[1];
-                var y = +match[2];
-                rect(screen, x, y);
+
+            if ((match = rectRegex.exec(line)) !== null) {
+                display.rect(+match[1], +match[2]);
+            } else if ((match = rotateRegex.exec(line)) !== null) {
+                if (match[1] === 'row y') {
+                    display.rotateRow(+match[2], +match[3]);
+                } else {
+                    display.rotateColumn(+match[2], +match[3]);
+                }
             }
         });
 
-    return screen;
+    return display;
 }
+
+console.log(programDisplay(input, 6, 50).getNumberLit());
