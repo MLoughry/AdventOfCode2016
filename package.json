@@ -56,5 +56,8 @@
     "day25.2": "node day25/part2.js"
   },
   "author": "Michael Loughry <miclo@microsoft.com>",
-  "license": "ISC"
+  "license": "ISC",
+  "dependencies": {
+    "md5": "^2.2.1"
+  }
 }
