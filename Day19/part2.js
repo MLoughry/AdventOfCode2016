@@ -1,18 +1,17 @@
-function createLoop(size) {
-    return new Array(size).fill(true).map((a, index) => index + 1);
-}
-
-function whiteElephant(elfLoop) {
-    for (var i = 0; elfLoop.length > 1; i++) {
-        if (i >= elfLoop.length) {
-            i -= elfLoop.length;
-            console.log(`Completed loop. Length: ${elfLoop.length}`);
+function whiteElephant(size) {
+    // Derived from pattern at http://pastebin.com/raw/8vdM5Jcz
+    var winner = 1;
+    for (var i = 1; i < size; i++) {
+        if (winner === i) {
+            winner = 1;
+        } else if (winner < i / 2) {
+            winner++;
+        } else {
+            winner += 2;
         }
-        var elfToRemove = Math.floor(i + elfLoop.length / 2) % elfLoop.length;
-        elfLoop.splice(elfToRemove, 1);
     }
 
-    return elfLoop[0];
+    return winner;
 }
 
-console.log(whiteElephant(createLoop(3018458)));
+console.log(whiteElephant(3018458));
