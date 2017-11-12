@@ -45,39 +45,50 @@ function buildMazeGraph(inputText) {
 }
 
 function buildCheckpointCostMatrix(numberedNodes) {
-    let costMatrix = numberedNodes.map(node => []);
+    let searchNodes = numberedNodes.map(node => {
+        node.costs = numberedNodes.map(() => NaN);
+        node.costs[node.checkpoint] = 0;
+        return node;
+    });
 
-    numberedNodes.forEach((sourceNode, index) => {
-        numberedNodes.slice(index + 1).forEach(destNode => {
-            let cost = getShortestPathCost(sourceNode, destNode);
-            costMatrix[sourceNode.checkpoint][destNode.checkpoint] = cost;
-            costMatrix[destNode.checkpoint][sourceNode.checkpoint] = cost;
+    while(searchNodes.length !== 0) {
+        searchNodes = iterateGraph(searchNodes);
+    }
+
+    return numberedNodes.map(node => node.costs);
+}
+
+function iterateGraph(searchNodes) {
+    let nextIteration = [];
+
+    searchNodes.forEach(source => {
+        source.links.forEach(dest => {
+            let shouldAdd = false;
+
+            if (!dest.costs) {
+                shouldAdd = true;
+                dest.costs = source.costs.map(cost => cost + 1);
+            } else {
+                for (let i = 0; i < dest.costs.length; i++) {
+                    if (!isNaN(source.costs[i])
+                        && (isNaN(dest.costs[i]) || source.costs[i] + 1 < dest.costs[i])) {
+                            dest.costs[i] = source.costs[i] + 1;
+                            shouldAdd = true;
+                        }
+                }
+            }
+
+            if (shouldAdd) {
+                nextIteration.push(dest);
+            }
         });
     });
 
-    return costMatrix;
-}
-
-function getShortestPathCost(source, dest) {
-    let queue = source.links.map(node => ({ cost: 1, node: node}));
-    let visitedNodes = [];
-    visitedNodes[source.id] = true;
-
-    let nextNode;
-    while ((nextNode = queue.shift()).node.id !== dest.id) {
-        visitedNodes[nextNode.node.id] = true;
-        nextNode.node.links.forEach(node => {
-            if (!visitedNodes[node.id]) {
-                queue.push({cost: nextNode.cost + 1, node: node});
-            }
-        });
-    }
-
-    return nextNode.cost;
+    return nextIteration;
 }
 
 function getSalesmanPathCost(costMatrix) {
-    let queue = costMatrix[0].map((cost, index) => ({cost: cost, visited: [0, index], current: index}));
+    let queue = costMatrix[0].slice(1).map((cost, index) => ({cost: cost, visited: [0, index + 1], current: index + 1}));
     queue.sort((a, b) => a.cost - b.cost);
 
     let next;
